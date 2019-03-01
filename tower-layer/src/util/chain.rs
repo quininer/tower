@@ -1,3 +1,4 @@
+use std::marker::PhantomData;
 use tower_service::Service;
 use Layer;
 
@@ -5,9 +6,10 @@ use Layer;
 ///
 /// This type is produced by `Layer::chain`.
 #[derive(Debug)]
-pub struct Chain<Inner, Outer> {
+pub struct Chain<Inner, Outer, M> {
     inner: Inner,
     outer: Outer,
+    _p: PhantomData<fn(M)>,
 }
 
 /// Error's produced when chaining two layers together
@@ -18,18 +20,22 @@ pub enum ChainError<I, O> {
     Outer(O),
 }
 
-impl<Inner, Outer> Chain<Inner, Outer> {
+impl<Inner, Outer, M> Chain<Inner, Outer, M> {
     /// Create a new `Chain`.
     pub fn new(inner: Inner, outer: Outer) -> Self {
-        Chain { inner, outer }
+        Chain {
+            inner,
+            outer,
+            _p: PhantomData,
+        }
     }
 }
 
-impl<S, Request, Inner, Outer> Layer<S, Request> for Chain<Inner, Outer>
+impl<S, Req, MidReq, NextReq, Inner, Outer> Layer<S, Req, NextReq> for Chain<Inner, Outer, MidReq>
 where
-    S: Service<Request>,
-    Inner: Layer<S, Request>,
-    Outer: Layer<Inner::Service, Request>,
+    S: Service<NextReq>,
+    Inner: Layer<S, MidReq, NextReq>,
+    Outer: Layer<Inner::Service, Req, MidReq>,
 {
     type Response = Outer::Response;
     type Error = Outer::Error;

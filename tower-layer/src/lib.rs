@@ -91,7 +91,7 @@ use tower_service::Service;
 /// The above log implementation is decoupled from the underlying protocol and
 /// is also decoupled from client or server concerns. In other words, the same
 /// log middleware could be used in either a client or a server.
-pub trait Layer<S, Request> {
+pub trait Layer<S, Request, NextRequest = Request> {
     /// The wrapped service response type
     type Response;
 
