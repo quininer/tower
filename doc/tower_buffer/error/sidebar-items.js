@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ServiceError","An error produced by a `Service` wrapped by a `Buffer`"],["SpawnError","Error produced when spawning the worker fails"]]});
